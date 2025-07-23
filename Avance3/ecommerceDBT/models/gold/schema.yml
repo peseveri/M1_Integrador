@@ -1,0 +1,220 @@
+# Archivo: Avane3/models/gold/schema.yml (ACTUALIZADO)
+version: 2
+
+models:
+  - name: dim_tiempo
+    description: "Dimensión de tiempo que contiene detalles de fecha y hora."
+    columns:
+      - name: tiempo_id
+        description: "Clave primaria de la dimensión tiempo (formato YYYYMMDD)."
+        tests:
+          - unique
+          - not_null
+      - name: fecha
+        description: "La fecha completa."
+      - name: anio
+        description: "Año de la fecha."
+      - name: mes
+        description: "Número del mes (1-12)."
+      - name: nombre_mes
+        description: "Nombre completo del mes."
+      - name: dia_semana_num
+        description: "Número del día de la semana (1=Lunes, 7=Domingo)."
+      - name: nombre_dia_semana
+        description: "Nombre del día de la semana."
+
+  - name: dim_categoria
+    description: "Dimensión que almacena información sobre las categorías de productos (SCD Tipo 1)."
+    columns:
+      - name: categoria_id
+        description: "Clave primaria de la dimensión categoría."
+        tests:
+          - unique
+          - not_null
+      - name: nombre
+        description: "Nombre de la categoría."
+      - name: descripcion
+        description: "Descripción de la categoría."
+      # - name: categorizacion # REMOVIDO: No presente en la tabla de origen Categorias
+
+  - name: dim_producto
+    description: "Dimensión que contiene información de productos, incluyendo historial de cambios de precio, categoría y stock (SCD Tipo 2)."
+    columns:
+      - name: producto_sk
+        description: "Clave subrogada de la dimensión producto (PK). Identifica una versión única del producto."
+        tests:
+          - unique
+          - not_null
+      - name: product_id
+        description: "Clave de negocio original del producto."
+      - name: nombre
+        description: "Nombre del producto."
+      - name: descripcion
+        description: "Descripción del producto."
+      - name: categoria_id
+        description: "ID de la categoría a la que pertenece el producto (FK a DimCategoria)."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_categoria')
+              field: categoria_id
+      - name: precio_actual
+        description: "Precio actual del producto en esta versión."
+      - name: stock # AÑADIDO
+        description: "Cantidad de stock del producto en esta versión."
+      - name: fecha_inicio_validez_scd
+        description: "Fecha de inicio de validez de esta versión del producto (para SCD Tipo 2)."
+        tests:
+          - not_null
+      - name: fecha_fin_validez_scd
+        description: "Fecha de fin de validez de esta versión del producto (para SCD Tipo 2)."
+        tests:
+          - not_null
+      - name: es_actual
+        description: "Indica si esta es la versión actual del producto (TRUE/FALSE)."
+        tests:
+          - dbt_utils.fewer_than_one_row:
+              where: "es_actual = 1" # Usar 1 para TRUE en MySQL TINYINT(1)
+              group_by: "product_id"
+
+  - name: dim_usuario
+    description: "Dimensión que almacena información de usuarios, incluyendo historial de cambios en dirección (SCD Tipo 2)."
+    columns:
+      - name: usuario_sk
+        description: "Clave subrogada de la dimensión usuario (PK). Identifica una versión única del usuario."
+        tests:
+          - unique
+          - not_null
+      - name: usuario_id
+        description: "Clave de negocio original del usuario."
+      - name: nombre
+        description: "Nombre del usuario."
+      - name: apellido
+        description: "Apellido del usuario."
+      - name: direccion # AÑADIDO
+        description: "Dirección completa del usuario."
+      - name: fecha_registro
+        description: "Fecha de registro del usuario."
+      # - name: telefono # REMOVIDO: No presente en la tabla de origen Usuarios
+      - name: fecha_inicio_validez_scd
+        description: "Fecha de inicio de validez de esta versión del usuario (para SCD Tipo 2)."
+        tests:
+          - not_null
+      - name: fecha_fin_validez_scd
+        description: "Fecha de fin de validez de esta versión del usuario (para SCD Tipo 2)."
+        tests:
+          - not_null
+      - name: es_actual_scd
+        description: "Indica si esta es la versión actual del usuario (TRUE/FALSE)."
+        tests:
+          - dbt_utils.fewer_than_one_row:
+              where: "es_actual_scd = 1" # Usar 1 para TRUE en MySQL TINYINT(1)
+              group_by: "user_id"
+
+  - name: dim_metodo_pago
+    description: "Dimensión que contiene los métodos de pago disponibles (SCD Tipo 1)."
+    columns:
+      - name: metodo_pago_id
+        description: "Clave primaria de la dimensión método de pago."
+        tests:
+          - unique
+          - not_null
+      - name: metodo_metodo
+        description: "Nombre del método de pago (ej. 'Tarjeta de Crédito', 'PayPal')."
+      - name: descripcion
+        description: "Descripción del método de pago."
+
+  - name: fact_ventas
+    description: "Tabla de hechos que registra cada línea de detalle de una venta."
+    columns:
+      - name: venta_id
+        description: "Identificador único de la línea de venta."
+        tests:
+          - not_null
+      - name: orden_id
+        description: "Identificador de la orden a la que pertenece la línea de venta."
+        tests:
+          - not_null
+      - name: producto_sk
+        description: "Clave foránea a la dimensión producto (SCD Tipo 2)."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_producto')
+              field: producto_sk
+      - name: usuario_sk
+        description: "Clave foránea a la dimensión usuario (SCD Tipo 2)."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_usuario')
+              field: usuario_sk
+      - name: tiempo_id
+        description: "Clave foránea a la dimensión tiempo."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_tiempo')
+              field: tiempo_id
+      - name: precio_unitario
+        description: "Precio unitario del producto en el momento de la venta."
+      - name: quantity
+        description: "Cantidad vendida del producto."
+      - name: total_linea
+        description: "Total de la línea de venta (precio_unitario * quantity)."
+
+  - name: fact_pagos
+    description: "Tabla de hechos que registra cada transacción de pago."
+    columns:
+      - name: pago_id
+        description: "Clave primaria de la tabla de hechos pagos."
+        tests:
+          - unique
+          - not_null
+      - name: orden_id
+        description: "Identificador de la orden asociada al pago."
+        tests:
+          - not_null
+      - name: metodo_pago_id
+        description: "Clave foránea a la dimensión método de pago."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_metodo_pago')
+              field: metodo_pago_id
+      - name: tiempo_id
+        description: "Clave foránea a la dimensión tiempo."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_tiempo')
+              field: tiempo_id
+      - name: monto_pagado
+        description: "Monto total del pago."
+      - name: estado_pago
+        description: "Estado actual del pago (ej. 'Completado', 'Pendiente', 'Fallido')."
+
+  - name: fct_reseñas
+    description: "Tabla de hechos que registra las reseñas de productos."
+    columns:
+      - name: reseña_id
+        description: "Clave primaria de la tabla de hechos reseñas."
+        tests:
+          - unique
+          - not_null
+      - name: producto_sk
+        description: "Clave foránea a la dimensión producto (SCD Tipo 2)."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_producto')
+              field: producto_sk
+      - name: tiempo_id
+        description: "Clave foránea a la dimensión tiempo."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_tiempo')
+              field: tiempo_id
+      - name: rating
+        description: "Calificación de la reseña (ej. 1-5)."

@@ -1,0 +1,1 @@
+SELECT id_pago, order_id, id_metodo_pago, fecha_pago, monto_pagado, estado_pago FROM {{ ref('stg_historial_pagos') }}

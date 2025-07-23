@@ -1,0 +1,9 @@
+pandas==2.2.3
+SQLAlchemy==2.0.40
+python-dotenv==1.1.0
+matplotlib==3.8.4
+seaborn==0.13.2
+pymysql==1.1.1
+dbt-core==1.7.19
+dbt-mysql==1.7.0
+

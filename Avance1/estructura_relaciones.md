@@ -1,211 +1,172 @@
-🛒 1. Productos más vendidos por volumen
-Pregunta: ¿Cuáles son los productos más vendidos por volumen?
+# 📦 Modelo de Datos EcommerceDB + Preguntas de Negocio
 
-Atributos clave:
+---
 
-OrdenesProductos.ProductoID → ID del producto.
+## 🧱 Tablas (PK y FK)
 
-OrdenesProductos.Cantidad → Cantidad vendida por producto.
+### Usuarios
+- `UsuarioID` (PK)
 
-Productos.Nombre → Nombre del producto (opcional para visualización).
+### Categorias
+- `CategoriaID` (PK)
 
-Relaciones:
+### Productos
+- `ProductoID` (PK)
+- `CategoriaID` (FK → Categorias.CategoriaID)
 
-OrdenesProductos.ProductoID → 🔑 foránea a Productos.ProductoID.
+### Ordenes
+- `OrdenID` (PK)
+- `UsuarioID` (FK → Usuarios.UsuarioID)
 
-OrdenesProductos.OrdenID → 🔑 foránea a Ordenes.OrdenID.
+### DetalleOrdenes
+- `DetalleID` (PK)
+- `OrdenID` (FK → Ordenes.OrdenID)
+- `ProductoID` (FK → Productos.ProductoID)
 
-💸 2. Ticket promedio por orden
-Pregunta: ¿Cuál es el ticket promedio por orden?
+### DireccionesEnvio
+- `DireccionID` (PK)
+- `UsuarioID` (FK → Usuarios.UsuarioID)
 
-Atributos clave:
+### Carrito
+- `CarritoID` (PK)
+- `UsuarioID` (FK → Usuarios.UsuarioID)
+- `ProductoID` (FK → Productos.ProductoID)
 
-Pagos.OrdenID
+### MetodosPago
+- `MetodoPagoID` (PK)
 
-Pagos.Monto → Monto pagado.
+### OrdenesMetodosPago
+- `OrdenMetodoID` (PK)
+- `OrdenID` (FK → Ordenes.OrdenID)
+- `MetodoPagoID` (FK → MetodosPago.MetodoPagoID)
 
-Relaciones:
+### ReseñasProductos
+- `ReseñaID` (PK)
+- `UsuarioID` (FK → Usuarios.UsuarioID)
+- `ProductoID` (FK → Productos.ProductoID)
 
-Pagos.OrdenID → 🔑 foránea a Ordenes.OrdenID.
+### HistorialPagos
+- `PagoID` (PK)
+- `OrdenID` (FK → Ordenes.OrdenID)
+- `MetodoPagoID` (FK → MetodosPago.MetodoPagoID)
 
-🏷️ 3. Categorías con mayor número de productos vendidos
-Pregunta: ¿Cuáles son las categorías con mayor número de productos vendidos?
+---
 
-Atributos clave:
+## ❓ Preguntas de Negocio + Atributos Clave + Relaciones
 
-OrdenesProductos.ProductoID
+### 🛒 1. Productos más vendidos por volumen
+- **Atributos:** `DetalleOrdenes.ProductoID`, `DetalleOrdenes.Cantidad`, `Productos.Nombre`
+- **Relaciones:**
+  - `DetalleOrdenes.ProductoID → Productos.ProductoID`
+  - `DetalleOrdenes.OrdenID → Ordenes.OrdenID`
 
-Productos.CategoriaID
+---
 
-OrdenesProductos.Cantidad
+### 💸 2. Ticket promedio por orden
+- **Atributos:** `OrdenesMetodosPago.OrdenID`, `OrdenesMetodosPago.MontoPagado`
+- **Relaciones:** `OrdenesMetodosPago.OrdenID → Ordenes.OrdenID`
 
-Categorias.Nombre (opcional).
+---
 
-Relaciones:
+### 🏷️ 3. Categorías con mayor número de productos vendidos
+- **Atributos:** `DetalleOrdenes.ProductoID`, `Productos.CategoriaID`, `DetalleOrdenes.Cantidad`, `Categorias.Nombre`
+- **Relaciones:**
+  - `DetalleOrdenes.ProductoID → Productos.ProductoID`
+  - `Productos.CategoriaID → Categorias.CategoriaID`
 
-OrdenesProductos.ProductoID → Productos.ProductoID
+---
 
-Productos.CategoriaID → Categorias.CategoriaID
+### 📅 4. Día de la semana con más ventas
+- **Atributos:** `Ordenes.FechaOrden`
 
-📅 4. Día de la semana con más ventas
-Pregunta: ¿Qué día de la semana se generan más ventas?
+---
 
-Atributos clave:
+### 📈 5. Órdenes por mes y su variación
+- **Atributos:** `Ordenes.FechaOrden`, `Ordenes.OrdenID`
 
-Ordenes.Fecha
+---
 
-Relaciones:
+### 💳 6. Métodos de pago más utilizados
+- **Atributos:** `OrdenesMetodosPago.MetodoPagoID`, `MetodosPago.Nombre`
+- **Relaciones:** `OrdenesMetodosPago.MetodoPagoID → MetodosPago.MetodoPagoID`
 
-No requiere joins si ya está la tabla Ordenes.
+---
 
-📈 5. Órdenes por mes y su variación
-Pregunta: ¿Cuántas órdenes se generan cada mes y cuál es su variación?
+### 💰 7. Monto promedio por método de pago
+- **Atributos:** `OrdenesMetodosPago.MetodoPagoID`, `OrdenesMetodosPago.MontoPagado`
 
-Atributos clave:
+---
 
-Ordenes.Fecha
+### 🧾 8. Órdenes pagadas con más de un método
+- **Atributos:** `OrdenesMetodosPago.OrdenID`, `OrdenesMetodosPago.MetodoPagoID`
+- **Agrupación:** contar métodos distintos por `OrdenID`
 
-Ordenes.OrdenID
+---
 
-💳 6. Métodos de pago más utilizados
-Pregunta: ¿Cuáles son los métodos de pago más utilizados?
+### ⏳ 9. Pagos 'Procesando' o 'Fallido'
+- **Atributos:** `HistorialPagos.EstadoPago`
 
-Atributos clave:
+---
 
-Pagos.MetodoPagoID
+### 💵 10. Monto total recaudado por mes
+- **Atributos:** `HistorialPagos.FechaPago`, `HistorialPagos.Monto`
 
-MetodosPago.Nombre
+---
 
-Relaciones:
+### 👤 11. Usuarios registrados por mes
+- **Atributos:** `Usuarios.FechaRegistro`
 
-Pagos.MetodoPagoID → MetodosPago.MetodoPagoID
+---
 
-💰 7. Monto promedio por método de pago
-Pregunta: ¿Cuál es el monto promedio pagado por método de pago?
+### 🔁 12. Usuarios con más de una orden
+- **Atributos:** `Ordenes.UsuarioID`
+- **Relaciones:** `Ordenes.UsuarioID → Usuarios.UsuarioID`
 
-Atributos clave:
+---
 
-Pagos.MetodoPagoID
+### 🚫 13. Usuarios sin órdenes
+- **Atributos:** `Usuarios.UsuarioID`, `Ordenes.UsuarioID`
+- **Relación lógica:** `LEFT JOIN Usuarios → Ordenes` y filtrar `Ordenes.UsuarioID IS NULL`
 
-Pagos.Monto
+---
 
-🧾 8. Órdenes pagadas con más de un método
-Pregunta: ¿Cuántas órdenes se pagaron usando más de un método de pago?
+### 💳 14. Usuarios que más gastaron
+- **Atributos:** `Ordenes.UsuarioID`, `OrdenesMetodosPago.MontoPagado`
+- **Relaciones:**
+  - `OrdenesMetodosPago.OrdenID → Ordenes.OrdenID`
+  - `Ordenes.UsuarioID → Usuarios.UsuarioID`
 
-Atributos clave:
+---
 
-Pagos.OrdenID
+### 📝 15. Usuarios que dejaron reseñas
+- **Atributos:** `ReseñasProductos.UsuarioID`
 
-Pagos.MetodoPagoID
+---
 
-Agrupando por OrdenID y contando métodos distintos.
+### 📦 16. Productos con alto stock y bajas ventas
+- **Atributos:** `Productos.Stock`, `DetalleOrdenes.ProductoID`, `DetalleOrdenes.Cantidad`
 
-⏳ 9. Pagos 'Procesando' o 'Fallido'
-Pregunta: ¿Cuántos pagos están en estado 'Procesando' o 'Fallido'?
+---
 
-Atributos clave:
+### ❌ 17. Productos fuera de stock
+- **Atributos:** `Productos.Stock = 0`
 
-Pagos.Estado
+---
 
-💵 10. Monto total recaudado por mes
-Pregunta: ¿Cuál es el monto total recaudado por mes?
+### 👎 18. Productos peor calificados
+- **Atributos:** `ReseñasProductos.ProductoID`, `ReseñasProductos.Calificacion`
 
-Atributos clave:
+---
 
-Pagos.Fecha
+### 🗣️ 19. Productos con más reseñas
+- **Atributos:** `ReseñasProductos.ProductoID`
 
-Pagos.Monto
+---
 
-👤 11. Usuarios registrados por mes
-Pregunta: ¿Cuántos usuarios se registran por mes?
+### 💸 20. Categoría con mayor valor económico vendido
+- **Atributos:** `DetalleOrdenes.ProductoID`, `DetalleOrdenes.Cantidad`, `Productos.Precio`, `Productos.CategoriaID`, `Categorias.Nombre`
+- **Relaciones:**
+  - `DetalleOrdenes.ProductoID → Productos.ProductoID`
+  - `Productos.CategoriaID → Categorias.CategoriaID`
 
-Atributos clave:
-
-Usuarios.FechaRegistro
-
-🔁 12. Usuarios con más de una orden
-Pregunta: ¿Cuántos usuarios han realizado más de una orden?
-
-Atributos clave:
-
-Ordenes.UsuarioID
-
-Relaciones:
-
-Ordenes.UsuarioID → Usuarios.UsuarioID
-
-🚫 13. Usuarios sin órdenes
-Pregunta: ¿Cuántos usuarios registrados no han hecho ninguna compra?
-
-Atributos clave:
-
-Usuarios.UsuarioID
-
-Ordenes.UsuarioID
-
-**Un LEFT JOIN desde Usuarios a Ordenes y filtrar NULL.
-
-💳 14. Usuarios que más gastaron
-Pregunta: ¿Qué usuarios han gastado más en total?
-
-Atributos clave:
-
-Pagos.OrdenID → Ordenes.UsuarioID
-
-Pagos.Monto
-
-Relaciones:
-
-Pagos.OrdenID → Ordenes.OrdenID
-
-Ordenes.UsuarioID → Usuarios.UsuarioID
-
-📝 15. Usuarios que dejaron reseñas
-Pregunta: ¿Cuántos usuarios han dejado reseñas?
-
-Atributos clave:
-
-ReseñasProductos.UsuarioID
-
-📦 16. Productos con alto stock y bajas ventas
-Pregunta: ¿Qué productos tienen alto stock pero bajas ventas?
-
-Atributos clave:
-
-Productos.Stock
-
-OrdenesProductos.ProductoID, Cantidad
-
-❌ 17. Productos fuera de stock
-Pregunta: ¿Cuántos productos están actualmente fuera de stock?
-
-Atributos clave:
-
-Productos.Stock = 0
-
-👎 18. Productos peor calificados
-Pregunta: ¿Cuáles son los productos peor calificados?
-
-Atributos clave:
-
-ReseñasProductos.ProductoID
-
-ReseñasProductos.Calificacion
-
-🗣️ 19. Productos con más reseñas
-Pregunta: ¿Qué productos tienen mayor cantidad de reseñas?
-
-Atributos clave:
-
-ReseñasProductos.ProductoID
-
-💸 20. Categoría con mayor valor económico vendido
-Pregunta: ¿Qué categoría tiene el mayor valor económico vendido (no solo volumen)?
-
-Atributos clave:
-
-OrdenesProductos.ProductoID, Cantidad
-
-Productos.Precio, CategoriaID
-
-Categorias.Nombre
+---
