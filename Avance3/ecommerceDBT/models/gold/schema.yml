@@ -1,4 +1,4 @@
-# Archivo: Avane3/models/gold/schema.yml (ACTUALIZADO)
+
 version: 2
 
 models:
@@ -35,7 +35,6 @@ models:
         description: "Nombre de la categoría."
       - name: descripcion
         description: "Descripción de la categoría."
-      # - name: categorizacion # REMOVIDO: No presente en la tabla de origen Categorias
 
   - name: dim_producto
     description: "Dimensión que contiene información de productos, incluyendo historial de cambios de precio, categoría y stock (SCD Tipo 2)."
@@ -60,7 +59,7 @@ models:
               field: categoria_id
       - name: precio_actual
         description: "Precio actual del producto en esta versión."
-      - name: stock # AÑADIDO
+      - name: stock 
         description: "Cantidad de stock del producto en esta versión."
       - name: fecha_inicio_validez_scd
         description: "Fecha de inicio de validez de esta versión del producto (para SCD Tipo 2)."
@@ -74,7 +73,7 @@ models:
         description: "Indica si esta es la versión actual del producto (TRUE/FALSE)."
         tests:
           - dbt_utils.fewer_than_one_row:
-              where: "es_actual = 1" # Usar 1 para TRUE en MySQL TINYINT(1)
+              where: "es_actual = 1" 
               group_by: "product_id"
 
   - name: dim_usuario
@@ -91,11 +90,10 @@ models:
         description: "Nombre del usuario."
       - name: apellido
         description: "Apellido del usuario."
-      - name: direccion # AÑADIDO
+      - name: direccion 
         description: "Dirección completa del usuario."
       - name: fecha_registro
         description: "Fecha de registro del usuario."
-      # - name: telefono # REMOVIDO: No presente en la tabla de origen Usuarios
       - name: fecha_inicio_validez_scd
         description: "Fecha de inicio de validez de esta versión del usuario (para SCD Tipo 2)."
         tests:
@@ -108,7 +106,7 @@ models:
         description: "Indica si esta es la versión actual del usuario (TRUE/FALSE)."
         tests:
           - dbt_utils.fewer_than_one_row:
-              where: "es_actual_scd = 1" # Usar 1 para TRUE en MySQL TINYINT(1)
+              where: "es_actual_scd = 1"
               group_by: "user_id"
 
   - name: dim_metodo_pago

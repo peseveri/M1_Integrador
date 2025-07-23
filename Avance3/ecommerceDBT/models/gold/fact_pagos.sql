@@ -1,10 +1,10 @@
--- Archivo: Avane3/models/gold/fact_pagos.sql (VERIFICAR)
+
 {{ config(materialized='table') }}
 
 SELECT
     bp.id_pago AS pago_id,
     bp.order_id,
-    mp.metodo_pago_id, -- Esta columna ahora debería existir en 'mp' (dim_metodo_pago)
+    mp.metodo_pago_id,
     t.tiempo_id,
     bp.monto_pagado,
     bp.estado_pago

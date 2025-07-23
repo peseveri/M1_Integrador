@@ -1,8 +1,7 @@
--- Archivo: Avane3/models/gold/dim_tiempo.sql (ACTUALIZADO - Sin dbt_utils.date_spine - Para MySQL < 8.0)
+
 {{ config(materialized='table') }}
 
 WITH nums AS (
-    -- Genera una serie de números que cubra el rango de días
     SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
 ),
 hundreds AS (
@@ -10,7 +9,7 @@ hundreds AS (
     FROM nums AS t1
     CROSS JOIN nums AS t2
     CROSS JOIN nums AS t3
-    CROSS JOIN nums AS t4 -- Puedes añadir más joins si necesitas más días (ej. t5.n * 10000 para 100,000 días)
+    CROSS JOIN nums AS t4 
 ),
 date_series AS (
     SELECT DATE_ADD('2020-01-01', INTERVAL num DAY) AS fecha_generada_raw

@@ -1,4 +1,4 @@
--- Archivo: Avane3/models/intermediate/int_usuarios_scd.sql (VERSIÓN FINAL DE CORRECCIÓN)
+
 {{ config(materialized='incremental', unique_key='usuario_sk', merge_update_columns=['fecha_fin_validez_scd', 'es_actual_scd']) }}
 
 WITH
@@ -42,9 +42,9 @@ WITH
             apellido,
             direccion,
             fecha_registro,
-            fecha_registro AS fecha_inicio_validez_scd, -- Renombrado aquí, se usa en la SELECT final
-            CAST('9999-12-31' AS DATE) AS fecha_fin_validez_scd, -- Definida aquí, se usa en la SELECT final
-            TRUE AS es_actual_scd, -- Definida aquí, se usa en la SELECT final
+            fecha_registro AS fecha_inicio_validez_scd, 
+            CAST('9999-12-31' AS DATE) AS fecha_fin_validez_scd, 
+            TRUE AS es_actual_scd,
             MD5(
                 CONCAT_WS(
                     '__',
@@ -56,8 +56,6 @@ WITH
         FROM usuarios_con_direccion
     )
 SELECT
-    -- Seleccionar explícitamente cada columna con su nombre final aquí
-    -- para asegurarse de que dbt las "vea" correctamente.
     usuario_sk,
     user_id,
     nombre,
@@ -67,13 +65,13 @@ SELECT
     fecha_inicio_validez_scd,
     fecha_fin_validez_scd,
     es_actual_scd
-FROM usuarios_cambios -- ¡Usar el alias de la CTE final!
+FROM usuarios_cambios
 
 {% if is_incremental() %}
 WHERE NOT EXISTS (
     SELECT 1
     FROM {{ this }} AS old_data
-    WHERE old_data.user_id = usuarios_cambios.user_id -- Asegúrate de referenciar el alias de la CTE
+    WHERE old_data.user_id = usuarios_cambios.user_id 
       AND old_data.es_actual_scd = 1
       AND old_data.direccion = usuarios_cambios.direccion
 )

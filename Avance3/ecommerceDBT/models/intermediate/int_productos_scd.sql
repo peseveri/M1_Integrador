@@ -1,4 +1,4 @@
--- Archivo: Avane3/models/intermediate/int_productos_scd.sql (ACTUALIZADO - Clave Subrogada Manual)
+
 {{ config(materialized='incremental', unique_key='producto_sk', merge_update_columns=['fecha_fin_validez_scd', 'es_actual']) }}
 
 WITH
@@ -22,10 +22,10 @@ WITH
             precio_actual,
             stock,
             fecha_inicio_validez_scd_raw,
-            -- IMPLEMENTACIÓN MANUAL DE CLAVE SUBROGADA PARA MYTQL
+
             MD5(
                 CONCAT_WS(
-                    '__', -- Separador robusto para evitar colisiones
+                    '__', 
                     COALESCE(CAST(product_id AS CHAR), '_NULL_'),
                     COALESCE(CAST(id_categoria AS CHAR), '_NULL_'),
                     COALESCE(CAST(precio_actual AS CHAR), '_NULL_'),
@@ -33,7 +33,7 @@ WITH
                     COALESCE(CAST(fecha_inicio_validez_scd_raw AS CHAR), '_NULL_')
                 )
             ) AS producto_sk
-            -- FIN DE IMPLEMENTACIÓN MANUAL
+           
         FROM productos_fuente
     )
 SELECT
